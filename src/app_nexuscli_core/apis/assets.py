@@ -16,6 +16,7 @@ class Assets:
         self.base_url: str = str(environ.get('BASE_URL'))
         self.encoded: str = str(base64.b64encode(pass_phrase)).replace('b', '')
 
+        self.is_sha_exist: list() = list()
         self.all_assets: list = list()
         
     def get_all_assets(self, repository_name: str, continuation_token: str = ''):
@@ -35,17 +36,26 @@ class Assets:
         
         assets = json_loads(response.content)
         
-        if assets["items"] != None:
-            for item in assets["items"]:
-                self.all_assets.append({
-                    "asset_id": item["id"],
-                    "sha256": item["checksum"]["sha256"]
-                })
-            
         if (assets["continuationToken"] != None):
+            for item in assets["items"]:
+                if str(item["path"]).find("-/blobs/") == -1:
+                    if item["checksum"]["sha256"] not in self.is_sha_exist:
+                        self.all_assets.append({
+                            "asset_id": item["id"],
+                            "sha256": item["checksum"]["sha256"]
+                        })
+                        self.is_sha_exist.append(item["checksum"]["sha256"])
             self.get_all_assets(repository_name="docker-hosted", continuation_token=assets["continuationToken"])
         else:
-            print(len(self.all_assets))
+            for item in assets["items"]:
+                if str(item["path"]).find("-/blobs/") == -1:
+                    if item["checksum"]["sha256"] not in self.is_sha_exist:
+                        self.all_assets.append({
+                            "asset_id": item["id"],
+                            "sha256": item["checksum"]["sha256"]
+                        })
+                        self.is_sha_exist.append(item["checksum"]["sha256"])
+            return
             
     def delete_old_assets(self, latest_assets: list):
         for item in self.all_assets:
@@ -58,3 +68,8 @@ class Assets:
                             "Authorization": f"Basic {self.encoded}"
                         }
                     )
+    
+    def get_assets_count(self, repository_name: str): 
+        self.get_all_assets(repository_name=repository_name)
+        return len(self.all_assets)
+

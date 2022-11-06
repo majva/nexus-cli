@@ -1,5 +1,5 @@
 
-from requests import post, get
+from requests import get
 
 from json import loads as json_loads
 from os import environ
@@ -19,7 +19,7 @@ class Components:
         # get latest packages exist in nexus
         self.latest_package: list = list()
         
-    def get_latest_components(self, repository_name: str, continuation_token: str = ''):
+    def get_components(self, repository_name: str, continuation_token: str = ''):
         
         if continuation_token != '':
             api = f"/service/rest/v1/components?repository={repository_name}&continuationToken={continuation_token}"
@@ -35,14 +35,23 @@ class Components:
         )
         
         components = json_loads(response.content)
-
         if (components["continuationToken"] != None):
-
             for item in components["items"]:
                 self.latest_package.append({
                     "name": item["name"],
                     "sha256": item["assets"][0]["checksum"]["sha256"],
                     "asset_id": item["assets"][0]["id"]
                 })
-            
-            self.get_latest_components(repository_name="docker-hosted", continuation_token=components["continuationToken"])
+            self.get_components(repository_name=repository_name, continuation_token=components["continuationToken"])
+        else:
+            for item in components["items"]:
+                self.latest_package.append({
+                    "name": item["name"],
+                    "sha256": item["assets"][0]["checksum"]["sha256"],
+                    "asset_id": item["assets"][0]["id"]
+                })
+
+
+    def get_components_count(self, repository_name: str) -> int:
+        self.get_components(repository_name=repository_name)
+        return len(self.latest_package)

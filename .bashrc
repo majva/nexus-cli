@@ -1,5 +1,5 @@
 
-export BASE_URL="https://nexus.sarrafex.com"
+export BASE_URL="http://192.168.14.149:8082"
 
 export USERNAME="admin"
-export PASSWORD="b8rMSvM32iJeQVM"
+export PASSWORD="123"
