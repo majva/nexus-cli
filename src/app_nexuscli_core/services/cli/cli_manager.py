@@ -16,15 +16,18 @@ class CLIManager:
         if argv[1] == "-h" or argv[1] == "--help":
             from .components.help import HelpComponent
             HelpComponent.print()
-        elif argv[1] == "-sc":
+
+        elif argv[1] == "-sc": # count of components
             from ...apis.components import Components
             components = Components()
-            print(components.get_components_count(argv[2]))
-        elif argv[1] == "-sa":
+            print(f"count of components: {components.get_components_count(argv[2])}")
+
+        elif argv[1] == "-sa": # count of assets
             from ...apis.assets import Assets
             assets = Assets()
-            print(assets.get_assets_count(argv[2]))
-        elif argv[1] == "-ad":
+            print(f"count of assets: {components.get_components_count(argv[2])}")
+
+        elif argv[1] == "-ad": # delete oldest assets
             from ...apis.assets import Assets
             from ...apis.components import Components
             components = Components()
@@ -32,5 +35,8 @@ class CLIManager:
             assets = Assets()
             assets.get_all_assets(repository_name=argv[2])
             assets.delete_old_assets(components.latest_package)
+
+        elif argv[1] == "-jad": # activing the cron job for delete the oldest assets
+            pass
 
             
