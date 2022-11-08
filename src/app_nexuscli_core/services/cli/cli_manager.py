@@ -25,7 +25,7 @@ class CLIManager:
         elif argv[1] == "-sa": # count of assets
             from ...apis.assets import Assets
             assets = Assets()
-            print(f"count of assets: {components.get_components_count(argv[2])}")
+            print(f"count of assets: {assets.get_assets_count(argv[2])}")
 
         elif argv[1] == "-ad": # delete oldest assets
             from ...apis.assets import Assets
