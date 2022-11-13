@@ -40,7 +40,8 @@ class Components:
                 self.latest_package.append({
                     "name": item["name"],
                     "sha256": item["assets"][0]["checksum"]["sha256"],
-                    "asset_id": item["assets"][0]["id"]
+                    "asset_id": item["assets"][0]["id"],
+                    "fslayers": self.get_all_manifest(component_path=item["name"])
                 })
             self.get_components(repository_name=repository_name, continuation_token=components["continuationToken"])
         else:
@@ -48,10 +49,29 @@ class Components:
                 self.latest_package.append({
                     "name": item["name"],
                     "sha256": item["assets"][0]["checksum"]["sha256"],
-                    "asset_id": item["assets"][0]["id"]
+                    "asset_id": item["assets"][0]["id"],
+                    "fslayers": self.get_all_manifest(component_path=item["name"])
                 })
-
 
     def get_components_count(self, repository_name: str) -> int:
         self.get_components(repository_name=repository_name)
+        print(self.latest_package)
         return len(self.latest_package)
+
+    def get_all_manifest(self, component_path: str):
+        
+        fslayers: set = set()
+
+        response = get(
+            self.base_url + f"/repository/docker-hosted/v2/{component_path}/manifests/latest",
+            headers={
+                "accept": "application/json", 
+                "Authorization": f"Basic {self.encoded}"
+            }
+        )
+        fs_layers = json_loads(response.content)
+
+        for item in fs_layers["fsLayers"]:
+            fslayers.add(item["blobSum"])
+        print("fslayers: " + str(len(fslayers)))
+        return fslayers
